@@ -1,0 +1,21 @@
+{
+    "name": "cayeye/whatsapp-business-api-client",
+    "type": "library",
+    "description": "A HTTP client for the WhatsApp Business API",
+    "license": "MIT",
+    "require": {
+        "php": "^7.2",
+        "ext-json": "*",
+        "symfony/mime": "^4.3",
+        "symfony/http-client": "^4.3"
+    },
+    "autoload": {
+        "psr-4": { "Cayeye\\WhatsAppBusinessApiClient\\": "" }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
+        }
+    }
+}
