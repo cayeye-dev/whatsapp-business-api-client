@@ -10,7 +10,10 @@
         "symfony/http-client": "^4.3"
     },
     "autoload": {
-        "psr-4": { "Cayeye\\WhatsAppBusinessApiClient\\": "" }
+        "psr-4": { "Cayeye\\WhatsAppBusinessApiClient\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "minimum-stability": "dev",
     "extra": {

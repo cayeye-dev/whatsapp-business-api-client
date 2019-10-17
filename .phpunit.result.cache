@@ -1,0 +1,1 @@
+C:37:"PHPUnit\Runner\DefaultTestResultCache":297:{a:2:{s:7:"defects";a:2:{s:35:"WhatsAppBusinessApiClientTest::test";i:5;s:48:"Cayeye\Tests\WhatsAppBusinessApiClientTest::test";i:4;}s:5:"times";a:2:{s:35:"WhatsAppBusinessApiClientTest::test";d:0.025999999999999999;s:48:"Cayeye\Tests\WhatsAppBusinessApiClientTest::test";d:0.0060000000000000001;}}}

@@ -5,6 +5,7 @@ namespace Cayeye\WhatsAppBusinessApiClient;
 use Cayeye\WhatsAppBusinessApiClient\Exception\ResponseException;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
@@ -15,32 +16,32 @@ class WhatsAppBusinessApiClient
 {
     /** @var bool */
     protected $async = false;
-    /** @var HttpClient */
+    /** @var array */
+    protected $config;
+    /** @var HttpClientInterface */
     protected $client;
-    /** @var HttpClient */
+    /** @var HttpClientInterface */
     public static $staticClient;
 
-    public function __construct(string $authBearer, string $url = null)
+    public function __construct(string $authBearer = null, string $url = null)
     {
-        $config = [
+        $this->config = [
             'base_uri'    => $url,
             'auth_bearer' => $authBearer,
             'headers'     => [
                 'Accept' => 'application/json',
             ],
         ];
-
-        $this->client = self::$staticClient ?? HttpClient::create($config);
     }
 
     /**
      * @param string $id
      *
-     * @return array|ResponseInterface|null
+     * @return ResponseInterface
      */
-    public function getMedia(string $id)
+    public function getMedia(string $id): ResponseInterface
     {
-        return $this->client->request('GET', sprintf('/v1/media/%s', $id));
+        return $this->getClient()->request('GET', sprintf('/v1/media/%s', $id));
     }
 
     /**
@@ -49,7 +50,7 @@ class WhatsAppBusinessApiClient
      *
      * @return array|ResponseInterface|null
      */
-    public function postMedia(string $binary, string $mimeType)
+    public function uploadMedia(string $binary, string $mimeType)
     {
         $options = [
             'headers' => ['content-type' => $mimeType],
@@ -68,6 +69,24 @@ class WhatsAppBusinessApiClient
     }
 
     /**
+     * @param string $url
+     *
+     * @return ResponseInterface|array|null
+     */
+    public function updateWebhook(string $url)
+    {
+        $data = [
+            'webhooks' => ['url' => $url],
+        ];
+
+        $options = [
+            'json' => $data,
+        ];
+
+        return $this->request('PATCH', '/v1/settings/application', $options);
+    }
+
+    /**
      * @param string $method
      * @param string $url
      * @param array  $options
@@ -76,13 +95,18 @@ class WhatsAppBusinessApiClient
      */
     public function request(string $method, string $url, array $options = [])
     {
-        $response = $this->client->request(strtoupper($method), $url, $options);
+        $response = $this->getClient()->request(strtoupper($method), $url, $options);
 
         if (false === $this->async) {
             return self::computeResponse($response);
         } else {
             return $response;
         }
+    }
+
+    public function setAsync(bool $async): void
+    {
+        $this->async = $async;
     }
 
     /**
@@ -105,17 +129,21 @@ class WhatsAppBusinessApiClient
         return $responseData;
     }
 
-    public function setAsync(bool $async)
-    {
-        $this->async = $async;
-    }
-
     /**
      * @param callable|ResponseInterface|ResponseInterface[]|iterable|null $responseFactory
      * @param string|null                                                  $baseUri
      */
-    public static function setMockClient($responseFactory = null, string $baseUri = null)
+    public static function setMockClient($responseFactory = null, string $baseUri = null): void
     {
         self::$staticClient = new MockHttpClient($responseFactory, $baseUri);
+    }
+
+    private function getClient(): HttpClientInterface
+    {
+        if (null === $this->client) {
+            $this->client = self::$staticClient ?? HttpClient::create($this->config);
+        }
+
+        return self::$staticClient ?? $this->client;
     }
 }
